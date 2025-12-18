@@ -1,3 +1,6 @@
+import sys
+import os
+
 from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
@@ -17,7 +20,7 @@ def create_app():
 
     # Configuração do Swagger 
     app.config['SWAGGER'] = {
-        'title': 'D&D Personagens API',
+        'title': 'API Criador de Personagens de D&D',
         'uiversion': 3
     }
     Swagger(app)

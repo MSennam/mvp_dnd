@@ -1,0 +1,104 @@
+from models.base import db
+from models.personagem import Personagem
+from models.magia import Magia
+from models.equipamento import Equipamento, Arma
+from services.dnd_api_client import DndApiClient
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Unindo o banco com a api externa
+
+class PersonagemService:
+    
+    def listar_todos(self):
+        return Personagem.query.all()
+
+    def buscar_por_id(self, id):
+        return Personagem.query.get(id)
+
+    def criar_personagem(self, dados):
+        # 1. Busca info da classe na API externa
+        classe_nome = dados.get('classe')
+        info_externa = DndApiClient.get_class_info(classe_nome)
+        
+        hit_die = "d8"
+        if info_externa:
+            hit_die = f"d{info_externa.get('hit_die')}"
+        
+        # 2. Instancia o objeto (desempacota JSON nos atributos)
+        novo_char = Personagem(**dados)
+        
+        # 3. Ajustes manuais
+        novo_char.hit_die = hit_die
+        if not novo_char.hp_maximo:
+            dado_valor = int(hit_die.replace('d', ''))
+            mod_con = (novo_char.constituicao - 10) // 2
+            novo_char.hp_maximo = dado_valor + mod_con
+            novo_char.hp_atual = novo_char.hp_maximo
+
+        db.session.add(novo_char)
+        db.session.commit()
+        return novo_char
+
+    def adicionar_magia(self, personagem_id, nome_magia):
+        personagem = self.buscar_por_id(personagem_id)
+        if not personagem: raise ValueError("Personagem não encontrado")
+
+        info = DndApiClient.get_spell_info(nome_magia)
+        if info:
+            nova_magia = Magia(
+                nome=info['nome'], nivel=info['nivel'],
+                escola=info['escola'], descricao=info['descricao'],
+                personagem_id=personagem.id
+            )
+        else:
+            nova_magia = Magia(nome=nome_magia, nivel=0, escola="Custom", 
+                               descricao="Custom", personagem_id=personagem.id)
+
+        db.session.add(nova_magia)
+        db.session.commit()
+        return nova_magia
+
+    def adicionar_equipamento(self, personagem_id, dados_item):
+        personagem = self.buscar_por_id(personagem_id)
+        if not personagem: raise ValueError("Personagem não encontrado")
+        
+        item = Equipamento(
+            nome=dados_item['nome'],
+            quantidade=dados_item.get('quantidade', 1),
+            personagem_id=personagem.id
+        )
+        db.session.add(item)
+        db.session.commit()
+
+    def adicionar_arma(self, personagem_id, nome_arma):
+        personagem = self.buscar_por_id(personagem_id)
+        if not personagem: raise ValueError("Personagem não encontrado")
+
+        info = DndApiClient.get_weapon_info(nome_arma)
+        
+        if info:
+            # Cálculo simples de bônus de ataque
+            mod_for = (personagem.forca - 10) // 2
+            mod_dex = (personagem.destreza - 10) // 2
+            bonus = mod_dex if "Finesse" in info['propriedades'] else mod_for
+            
+            nova_arma = Arma(
+                nome=info['nome'], dano_tipo=info['dano_tipo'],
+                alcance=info['alcance'], propriedades=info['propriedades'],
+                bonus_ataque=f"+{bonus + 2}", personagem_id=personagem.id
+            )
+        else:
+            nova_arma = Arma(nome=nome_arma, dano_tipo="1d4", alcance="5ft", 
+                             propriedades="Custom", personagem_id=personagem.id)
+
+        db.session.add(nova_arma)
+        db.session.commit()
+
+    def deletar_personagem(self, id):
+        personagem = Personagem.query.get(id)
+        if not personagem: return False
+        db.session.delete(personagem)
+        db.session.commit()
+        return True
