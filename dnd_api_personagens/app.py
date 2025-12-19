@@ -1,11 +1,9 @@
-import sys
-import os
 
 from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
-from models.base import db
-from routes.personagem_routes import personagem_bp
+from dnd_api_personagens.extensions import db
+from dnd_api_personagens.routes.personagem_routes import personagem_bp
 
 def create_app():
     app = Flask(__name__)

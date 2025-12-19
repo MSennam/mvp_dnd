@@ -1,8 +1,8 @@
-from models.base import db
-from models.personagem import Personagem
-from models.magia import Magia
-from models.equipamento import Equipamento, Arma
-from services.dnd_api_client import DndApiClient
+from dnd_api_personagens.extensions import db
+from dnd_api_personagens.models import Personagem
+from dnd_api_personagens.models import Magia
+from dnd_api_personagens.models import Equipamento, Arma
+from dnd_api_personagens.services.dnd_api_client import DndApiClient
 import logging
 
 logger = logging.getLogger(__name__)

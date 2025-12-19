@@ -1,4 +1,4 @@
-from models.base import db
+from dnd_api_personagens.extensions import db
 
 class Equipamento(db.Model):
     __tablename__ = 'equipamento'

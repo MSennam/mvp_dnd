@@ -1,10 +1,9 @@
-from flask_marshmallow import Marshmallow
-from models.personagem import Personagem
-from models.magia import Magia
-from models.equipamento import Equipamento, Arma
+from dnd_api_personagens.extensions import ma
+from dnd_api_personagens.models.personagem import Personagem
+from dnd_api_personagens.models.magia import Magia
+from dnd_api_personagens.models.equipamento import Equipamento, Arma
 from marshmallow import fields
 
-ma = Marshmallow()
 
 class MagiaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

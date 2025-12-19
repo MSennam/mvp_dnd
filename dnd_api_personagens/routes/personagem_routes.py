@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from services.personagem_service import PersonagemService
-from schemas.personagem_schema import PersonagemSchema
+from dnd_api_personagens.services.personagem_service import PersonagemService
+from dnd_api_personagens.schemas.personagem_schema import PersonagemSchema
 import logging
 
 # controladores com swagger

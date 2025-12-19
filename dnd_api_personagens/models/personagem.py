@@ -1,10 +1,11 @@
-from models.base import db
+from dnd_api_personagens.extensions import db
 from sqlalchemy.orm import relationship
+
 
 class Personagem(db.Model):
     __tablename__ = 'personagem'
 
-    # --- Cabeçalho (Página 1) ---
+    # --- Cabeçalho ---
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     jogador_nome = db.Column(db.String(100))

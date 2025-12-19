@@ -1,4 +1,4 @@
-from models.base import db
+from dnd_api_personagens.extensions import db
 
 #classe para gerenciar as magias dos personagens
 class Magia(db.Model):
